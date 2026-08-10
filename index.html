@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ff5b79">
+  <meta name="description" content="落ちてくる商品をカゴでキャッチする、短時間アクションゲーム">
+  <title>Shopping Catch</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app" id="app">
+    <header class="brand" aria-label="Shopping Catch">
+      <span class="brand__bag" aria-hidden="true">★</span>
+      <span>SHOPPING <b>CATCH!</b></span>
+    </header>
+
+    <section class="game-shell" aria-label="ゲーム">
+      <div class="hud" id="hud" hidden>
+        <div class="hud__group">
+          <span class="hud__label">SCORE</span>
+          <strong id="score">0</strong>
+        </div>
+        <div class="combo" id="combo" aria-live="polite" hidden>2 COMBO!</div>
+        <div class="hud__group hud__group--right">
+          <span class="hud__label">TIME</span>
+          <strong id="time">60</strong>
+        </div>
+        <button class="icon-button" id="pauseButton" type="button" aria-label="一時停止">Ⅱ</button>
+        <button class="icon-button" id="soundButton" type="button" aria-label="サウンドをオフにする" aria-pressed="false">♪</button>
+      </div>
+
+      <div class="stage-wrap">
+        <canvas id="gameCanvas" aria-label="商品が落下するゲームエリア"></canvas>
+        <div class="announcement" id="announcement" aria-live="polite"></div>
+
+        <section class="screen screen--title" id="titleScreen">
+          <div class="title-art" aria-hidden="true">
+            <span>🍭</span><span>🧸</span><span>🍩</span>
+          </div>
+          <p class="eyebrow">60秒のショッピングチャレンジ</p>
+          <h1>Shopping<br><em>Catch!</em></h1>
+          <p class="lead">落ちてくる商品を<br>カゴでキャッチしよう！</p>
+          <div class="high-score-card">🏆 ハイスコア <strong id="titleHighScore">0</strong></div>
+          <button class="primary-button" id="startButton" type="button">ゲームスタート <span>▶</span></button>
+          <p class="start-hint">Enter / Space でもスタート</p>
+        </section>
+
+        <section class="screen screen--dialog" id="pauseScreen" hidden>
+          <div class="dialog">
+            <div class="dialog__icon" aria-hidden="true">☕</div>
+            <h2>ひとやすみ</h2>
+            <p>ゲームを一時停止しています</p>
+            <button class="primary-button" id="resumeButton" type="button">ゲームに戻る</button>
+            <button class="text-button" id="quitButton" type="button">タイトルへ</button>
+          </div>
+        </section>
+
+        <section class="screen screen--dialog" id="resultScreen" hidden>
+          <div class="confetti" id="confetti" aria-hidden="true"></div>
+          <div class="dialog result-dialog">
+            <div class="result-badge" id="resultBadge" aria-hidden="true">🛍️</div>
+            <p class="eyebrow">おかいもの終了！</p>
+            <h2 id="resultTitle">RESULT</h2>
+            <div class="result-score"><span>SCORE</span><strong id="resultScore">0</strong></div>
+            <p class="result-high">🏆 HIGH SCORE <strong id="resultHighScore">0</strong></p>
+            <button class="primary-button" id="replayButton" type="button">もう一度あそぶ <span>↻</span></button>
+            <button class="text-button" id="homeButton" type="button">タイトルへ</button>
+          </div>
+        </section>
+
+        <div class="countdown" id="countdown" aria-live="assertive" hidden></div>
+      </div>
+
+      <div class="keyboard-help" id="keyboardHelp">
+        <span><kbd>←</kbd><kbd>→</kbd> または <kbd>A</kbd><kbd>D</kbd></span> でカゴを移動
+        <span class="keyboard-help__pause"><kbd>P</kbd> 一時停止</span>
+      </div>
+    </section>
+  </main>
+
+  <nav class="touch-controls" id="touchControls" aria-label="移動操作">
+    <button class="control-button" id="leftButton" type="button" aria-label="左へ移動"><span>←</span><small>LEFT</small></button>
+    <div class="touch-controls__label">長押しで移動</div>
+    <button class="control-button" id="rightButton" type="button" aria-label="右へ移動"><span>→</span><small>RIGHT</small></button>
+  </nav>
+
+  <script src="game.js"></script>
+</body>
+</html>
