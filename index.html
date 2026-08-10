@@ -80,9 +80,17 @@
   </main>
 
   <nav class="touch-controls" id="touchControls" aria-label="移動操作">
-    <button class="control-button" id="leftButton" type="button" aria-label="左へ移動"><span>←</span><small>LEFT</small></button>
+    <button class="control-button" id="leftButton" type="button" aria-label="左へ移動">
+      <svg class="control-button__icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path d="M28 10 7 32l21 22V41h29V23H28V10Z"/>
+      </svg>
+    </button>
     <div class="touch-controls__label">長押しで移動</div>
-    <button class="control-button" id="rightButton" type="button" aria-label="右へ移動"><span>→</span><small>RIGHT</small></button>
+    <button class="control-button" id="rightButton" type="button" aria-label="右へ移動">
+      <svg class="control-button__icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path d="m36 10 21 22-21 22V41H7V23h29V10Z"/>
+      </svg>
+    </button>
   </nav>
 
   <script src="game.js"></script>

@@ -31,6 +31,7 @@ const elements = {
 };
 
 const ctx = elements.canvas.getContext("2d");
+const emojiSpriteCache = new Map();
 let state = "title";
 let width = 0;
 let height = 0;
@@ -325,27 +326,56 @@ function drawBackground() {
 
 function drawItems() {
   const size = getItemSize();
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
   for (const item of items) {
     ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.filter = "none";
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.translate(item.x, item.y);
     ctx.rotate(item.rotation);
     if (item.rare) {
       ctx.shadowColor = "#ffd43b";
       ctx.shadowBlur = 20;
-      ctx.fillStyle = "rgba(255,216,77,.5)";
-      ctx.beginPath();
-      ctx.arc(0, 0, size * .58, 0, Math.PI * 2);
-      ctx.fill();
       ctx.fillStyle = "#9a6200";
       ctx.font = `900 ${Math.max(10, size * .2)}px sans-serif`;
       ctx.fillText("★ RARE", 0, -size * .65);
     }
-    ctx.font = `${size}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
-    ctx.fillText(item.icon, 0, 0);
+    const sprite = getOpaqueEmojiSprite(item.icon, size);
+    ctx.drawImage(sprite, -size * .7, -size * .7, size * 1.4, size * 1.4);
     ctx.restore();
   }
+}
+
+function getOpaqueEmojiSprite(icon, size) {
+  const roundedSize = Math.max(1, Math.round(size));
+  const cacheKey = `${icon}:${roundedSize}`;
+  if (emojiSpriteCache.has(cacheKey)) return emojiSpriteCache.get(cacheKey);
+
+  const scale = 2;
+  const side = Math.ceil(roundedSize * 1.4 * scale);
+  const sprite = document.createElement("canvas");
+  sprite.width = side;
+  sprite.height = side;
+  const spriteContext = sprite.getContext("2d", { willReadFrequently: true });
+  spriteContext.textAlign = "center";
+  spriteContext.textBaseline = "middle";
+  spriteContext.font = `${roundedSize * scale}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+  spriteContext.fillText(icon, side / 2, side / 2);
+
+  // カラー絵文字に含まれる半透明ピクセルを、背景を追加せず商品部分だけ補強する。
+  const image = spriteContext.getImageData(0, 0, side, side);
+  for (let index = 3; index < image.data.length; index += 4) {
+    const alpha = image.data[index];
+    if (alpha >= 24) image.data[index] = 255;
+    else if (alpha > 0) image.data[index] = Math.min(255, alpha * 8);
+  }
+  spriteContext.putImageData(image, 0, 0);
+  emojiSpriteCache.set(cacheKey, sprite);
+  return sprite;
 }
 
 function drawBasket() {
