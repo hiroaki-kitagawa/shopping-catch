@@ -1,2 +1,5 @@
-# shopping-catch
+# Shopping Catch
 
+落ちてくる商品をカゴでキャッチする、ブラウザ向けアクションミニゲームです。
+
+- [ゲーム仕様書](docs/仕様書.md)
