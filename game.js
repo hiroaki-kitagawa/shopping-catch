@@ -301,27 +301,127 @@ function draw() {
 }
 
 function drawBackground() {
-  const sky = ctx.createLinearGradient(0, 0, 0, height);
-  sky.addColorStop(0, "#b9eff0");
-  sky.addColorStop(.72, "#e5f8e8");
-  sky.addColorStop(1, "#fff0bf");
-  ctx.fillStyle = sky;
+  const wall = ctx.createLinearGradient(0, 0, 0, height);
+  wall.addColorStop(0, "#e9f7f6");
+  wall.addColorStop(.57, "#fff8e8");
+  wall.addColorStop(.58, "#ead9c7");
+  wall.addColorStop(1, "#f7e8d7");
+  ctx.fillStyle = wall;
   ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = "rgba(255,255,255,.72)";
-  for (let i = 0; i < 5; i += 1) {
-    const x = ((i * 173 + 30) % 610) / 610 * width;
-    const y = (55 + (i % 3) * 78) / 720 * height;
+
+  // 天井と照明
+  ctx.fillStyle = "#d8ebea";
+  ctx.fillRect(0, 0, width, height * .1);
+  ctx.strokeStyle = "rgba(67, 112, 117, .16)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= width; x += width / 8) {
     ctx.beginPath();
-    ctx.ellipse(x, y, 28, 11, 0, 0, Math.PI * 2);
-    ctx.ellipse(x + 22, y + 2, 21, 9, 0, 0, Math.PI * 2);
+    ctx.moveTo(width / 2, height * .1);
+    ctx.lineTo(x, 0);
+    ctx.stroke();
+  }
+  for (const x of [width * .17, width * .5, width * .83]) {
+    ctx.fillStyle = "rgba(255, 244, 169, .24)";
+    ctx.beginPath();
+    ctx.moveTo(x - width * .05, height * .055);
+    ctx.lineTo(x - width * .13, height * .5);
+    ctx.lineTo(x + width * .13, height * .5);
+    ctx.lineTo(x + width * .05, height * .055);
+    ctx.fill();
+    ctx.fillStyle = "#fffdf2";
+    roundedRect(ctx, x - width * .045, height * .035, width * .09, height * .035, 5);
     ctx.fill();
   }
-  ctx.fillStyle = "rgba(77,187,124,.25)";
-  ctx.beginPath();
-  ctx.moveTo(0, height);
-  for (let x = 0; x <= width; x += width / 8) ctx.lineTo(x, height * (.86 + .035 * Math.sin(x * .03)));
-  ctx.lineTo(width, height);
+
+  // 奥の店舗サインとショーウィンドウ
+  const stores = [
+    { x: .035, w: .28, color: "#f27a91", label: "SWEETS" },
+    { x: .36, w: .28, color: "#37a6a2", label: "MARKET" },
+    { x: .685, w: .28, color: "#f0a33c", label: "GOODS" }
+  ];
+  for (const store of stores) {
+    const x = width * store.x;
+    const storeWidth = width * store.w;
+    ctx.fillStyle = "#f8fbfa";
+    ctx.fillRect(x, height * .14, storeWidth, height * .38);
+    ctx.fillStyle = store.color;
+    roundedRect(ctx, x, height * .14, storeWidth, height * .075, 7);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.92)";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = `900 ${Math.max(8, width * .018)}px sans-serif`;
+    ctx.fillText(store.label, x + storeWidth / 2, height * .177);
+    ctx.fillStyle = "#b8dde1";
+    ctx.fillRect(x + storeWidth * .06, height * .235, storeWidth * .88, height * .24);
+    ctx.strokeStyle = "rgba(255,255,255,.8)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x + storeWidth * .5, height * .235);
+    ctx.lineTo(x + storeWidth * .5, height * .475);
+    ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255,.42)";
+    ctx.beginPath();
+    ctx.moveTo(x + storeWidth * .13, height * .245);
+    ctx.lineTo(x + storeWidth * .37, height * .245);
+    ctx.lineTo(x + storeWidth * .24, height * .465);
+    ctx.lineTo(x + storeWidth * .08, height * .465);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // 左右の商品棚。中央は商品が見やすい落下レーンとして空ける。
+  drawShelf(width * .015, height * .33, width * .16, height * .3, ["#f04469", "#ffd84d", "#2f81d4"]);
+  drawShelf(width * .825, height * .33, width * .16, height * .3, ["#83dfc2", "#f0a33c", "#d56cc1"]);
+
+  // モールの床と奥行きのあるタイル
+  ctx.fillStyle = "rgba(255,255,255,.32)";
+  ctx.fillRect(0, height * .58, width, height * .42);
+  ctx.strokeStyle = "rgba(133, 101, 79, .17)";
+  ctx.lineWidth = 1;
+  for (let row = 0; row <= 6; row += 1) {
+    const progress = row / 6;
+    const y = height * (.58 + .42 * progress * progress);
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+  for (let column = -4; column <= 4; column += 1) {
+    ctx.beginPath();
+    ctx.moveTo(width * .5, height * .58);
+    ctx.lineTo(width * (.5 + column * .17), height);
+    ctx.stroke();
+  }
+}
+
+function drawShelf(x, y, shelfWidth, shelfHeight, colors) {
+  ctx.fillStyle = "#806750";
+  roundedRect(ctx, x, y, shelfWidth, shelfHeight, 5);
   ctx.fill();
+  ctx.fillStyle = "#f6eadb";
+  ctx.fillRect(x + shelfWidth * .06, y + shelfHeight * .04, shelfWidth * .88, shelfHeight * .88);
+  for (let row = 0; row < 3; row += 1) {
+    const shelfY = y + shelfHeight * (.28 + row * .29);
+    ctx.fillStyle = "#806750";
+    ctx.fillRect(x + shelfWidth * .04, shelfY, shelfWidth * .92, shelfHeight * .035);
+    for (let product = 0; product < 3; product += 1) {
+      ctx.fillStyle = colors[(row + product) % colors.length];
+      roundedRect(ctx, x + shelfWidth * (.11 + product * .28), shelfY - shelfHeight * .17, shelfWidth * .18, shelfHeight * .14, 3);
+      ctx.fill();
+    }
+  }
+}
+
+function roundedRect(context, x, y, rectWidth, rectHeight, radius) {
+  const r = Math.min(radius, rectWidth / 2, rectHeight / 2);
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.arcTo(x + rectWidth, y, x + rectWidth, y + rectHeight, r);
+  context.arcTo(x + rectWidth, y + rectHeight, x, y + rectHeight, r);
+  context.arcTo(x, y + rectHeight, x, y, r);
+  context.arcTo(x, y, x + rectWidth, y, r);
+  context.closePath();
 }
 
 function drawItems() {
