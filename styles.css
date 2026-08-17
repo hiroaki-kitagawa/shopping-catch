@@ -96,6 +96,10 @@ h1 em { color: var(--blue); font-style: normal; }
 kbd { display: inline-grid; place-items: center; min-width: 31px; height: 30px; margin: 0 2px; border: 1px solid #b8c0ca; border-bottom-width: 3px; border-radius: 7px; color: var(--navy); background: white; font: 700 13px inherit; }
 .touch-controls { display: none; }
 
+@media (min-width: 769px) and (pointer: fine) {
+  .keyboard-help { position: relative; top: -8px; min-height: 44px; margin-top: 0; }
+}
+
 @keyframes score-pop { 50% { transform: scale(1.28); } }
 @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 @keyframes time-pulse { 50% { transform: scale(1.15); } }
