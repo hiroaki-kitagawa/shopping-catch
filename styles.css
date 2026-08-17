@@ -51,7 +51,7 @@ button:focus-visible { outline: 4px solid #1565c0; outline-offset: 3px; }
 
 .stage-wrap { position: relative; aspect-ratio: 9 / 8; overflow: hidden; border: 3px solid var(--navy); border-radius: 22px; background: #b9eff0; }
 .hud:not([hidden]) + .stage-wrap { border-radius: 0 0 22px 22px; }
-#gameCanvas { display: block; width: 100%; height: 100%; }
+#gameCanvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
 .screen { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; }
 .screen--title { flex-direction: column; background: linear-gradient(#b8eff1 0 55%, #fff8dc 55%); }
 .screen--title::before { content: ""; position: absolute; inset: auto 0 38% 0; height: 18%; background: radial-gradient(ellipse at 50% 100%, #74d4a1 0 59%, transparent 60%); opacity: .65; }
@@ -104,6 +104,7 @@ kbd { display: inline-grid; place-items: center; min-width: 31px; height: 30px; 
 @keyframes confetti-fall { to { transform: translateY(125vh) rotate(650deg); } }
 
 @media (max-width: 768px), (pointer: coarse) {
+  #gameCanvas { cursor: default; }
   body { padding-bottom: calc(94px + env(safe-area-inset-bottom)); }
   .app { display: flex; flex-direction: column; justify-content: flex-end; height: calc(100dvh - 94px - env(safe-area-inset-bottom)); min-height: 0; padding: 6px 8px 2px; overflow: hidden; }
   .brand { margin-bottom: 6px; }

@@ -699,6 +699,15 @@ function onKeyUp(event) {
   if (["arrowright", "d"].includes(key)) setDirection("right", key, false);
 }
 
+function onCanvasPointerMove(event) {
+  if (event.pointerType !== "mouse" || state !== "playing") return;
+  const rect = elements.canvas.getBoundingClientRect();
+  if (!rect.width) return;
+  const playerHalf = getPlayerWidth() / 2;
+  const pointerX = (event.clientX - rect.left) * (width / rect.width);
+  player.x = Math.max(playerHalf, Math.min(width - playerHalf, pointerX));
+}
+
 elements.start.addEventListener("click", startGame);
 elements.replay.addEventListener("click", startGame);
 elements.pauseButton.addEventListener("click", pauseGame);
@@ -708,6 +717,7 @@ elements.home.addEventListener("click", goHome);
 elements.sound.addEventListener("click", toggleSound);
 bindControl(elements.left, "left");
 bindControl(elements.right, "right");
+elements.canvas.addEventListener("pointermove", onCanvasPointerMove);
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
 window.addEventListener("blur", clearInput);
