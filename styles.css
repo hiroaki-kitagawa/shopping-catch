@@ -146,11 +146,17 @@ kbd { display: inline-grid; place-items: center; min-width: 31px; height: 30px; 
 }
 
 @media (max-width: 430px) {
-  .hud { height: 58px; padding: 7px 9px; gap: 6px; }
-  .hud strong { font-size: 22px; }
-  .hud__group { min-width: 58px; }
-  .icon-button { width: 42px; height: 42px; flex-basis: 42px; }
-  .combo { font-size: 10px; padding: 3px 6px; }
+  .hud { grid-template-columns: minmax(42px, 1fr) auto minmax(32px, auto) 44px 44px; display: grid; height: 58px; padding: 7px 3px; column-gap: 2px; }
+  .hud strong { font-size: 20px; }
+  .hud__group { min-width: 0; }
+  .hud > .hud__group:first-child { grid-column: 1; }
+  .hud .combo { grid-column: 2; }
+  .hud__group--right { margin-left: 0; }
+  .hud .hud__group--right { grid-column: 3; }
+  #pauseButton { grid-column: 4; }
+  #soundButton { grid-column: 5; }
+  .icon-button { width: 44px; height: 44px; flex-basis: 44px; }
+  .combo { min-width: 0; margin-right: 0; padding: 2px 3px; font-size: 8px; }
   .screen { padding: 14px; }
   .title-art { font-size: 46px; }
   .lead { margin: 14px 0 10px; }
