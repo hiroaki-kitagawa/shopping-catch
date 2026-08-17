@@ -5,6 +5,8 @@ const CONFIG = Object.freeze({
   normalPoints: 10,
   rarePoints: 50,
   missPenalty: 5,
+  hazardPenalty: 10,
+  hazardChance: 0.12,
   rareChance: 0.05,
   rareGuaranteeAt: 50,
   playerSpeedRatio: 0.8,
@@ -39,7 +41,8 @@ const itemHitboxRatios = Object.freeze({
   "🧸": { width: 0.68, height: 0.8 },
   "🧢": { width: 0.82, height: 0.6 },
   "🧴": { width: 0.5, height: 0.84 },
-  "🎁": { width: 0.76, height: 0.76 }
+  "🎁": { width: 0.76, height: 0.76 },
+  "💣": { width: 0.7, height: 0.72 }
 });
 let state = "title";
 let width = 0;
@@ -231,8 +234,10 @@ function intersects(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b
 function spawnItem(phase) {
   const size = getItemSize();
   const activeRare = items.some((item) => item.rare);
+  const activeHazard = items.some((item) => item.hazard);
   const forceRare = elapsed >= CONFIG.rareGuaranteeAt && !rareSpawned;
   const rare = !activeRare && (forceRare || Math.random() < CONFIG.rareChance);
+  const hazard = !rare && !activeHazard && Math.random() < CONFIG.hazardChance;
   const minX = size;
   const maxX = width - size;
   let x = minX + Math.random() * Math.max(1, maxX - minX);
@@ -241,7 +246,8 @@ function spawnItem(phase) {
     x = minX + Math.random() * Math.max(1, maxX - minX);
   }
   const fallTime = phase.fallTime[0] + Math.random() * (phase.fallTime[1] - phase.fallTime[0]);
-  items.push({ x, y: -size, speed: (height + size * 2) / fallTime, icon: rare ? "🎁" : CONFIG.items[Math.floor(Math.random() * CONFIG.items.length)], rare, rotation: 0, spin: (Math.random() - .5) * 1.6, done: false });
+  const icon = rare ? "🎁" : hazard ? "💣" : CONFIG.items[Math.floor(Math.random() * CONFIG.items.length)];
+  items.push({ x, y: -size, speed: (height + size * 2) / fallTime, icon, rare, hazard, rotation: 0, spin: (Math.random() - .5) * 1.6, done: false });
   if (rare) rareSpawned = true;
 }
 
@@ -255,6 +261,17 @@ function comboBonus(value) {
 function catchItem(item) {
   if (item.done || state !== "playing") return;
   item.done = true;
+  if (item.hazard) {
+    score = Math.max(0, score - CONFIG.hazardPenalty);
+    combo = 0;
+    player.bounce = 1;
+    addFloater(item.x, item.y, `-${CONFIG.hazardPenalty}`, "#c82f53");
+    burst(item.x, item.y, 14, false, true);
+    flashScore("score-down");
+    playSound("hazard");
+    announce(`DANGER! -${CONFIG.hazardPenalty}`);
+    return;
+  }
   combo += 1;
   const points = (item.rare ? CONFIG.rarePoints : CONFIG.normalPoints) + comboBonus(combo);
   score += points;
@@ -270,6 +287,7 @@ function catchItem(item) {
 function missItem(item) {
   if (item.done || state !== "playing") return;
   item.done = true;
+  if (item.hazard) return;
   score = Math.max(0, score - CONFIG.missPenalty);
   combo = 0;
   addFloater(item.x, height - 22, `-${CONFIG.missPenalty}`, "#c82f53");
@@ -290,8 +308,8 @@ function checkHighScore() {
 
 function addFloater(x, y, text, color) { floaters.push({ x, y, text, color, life: .65, maxLife: .65 }); }
 
-function burst(x, y, count, rare) {
-  const colors = rare ? ["#ffd84d", "#ff9f1c", "#fff", "#f04469"] : ["#fff", "#83dfc2", "#ffd84d"];
+function burst(x, y, count, rare, hazard = false) {
+  const colors = hazard ? ["#c82f53", "#ff6b35", "#24324a", "#fff"] : rare ? ["#ffd84d", "#ff9f1c", "#fff", "#f04469"] : ["#fff", "#83dfc2", "#ffd84d"];
   for (let i = 0; i < count; i += 1) {
     const angle = Math.random() * Math.PI * 2;
     const speed = 45 + Math.random() * 100;
@@ -474,6 +492,12 @@ function drawItems() {
       ctx.fillStyle = "#9a6200";
       ctx.font = `900 ${Math.max(10, size * .2)}px sans-serif`;
       ctx.fillText("★ RARE", 0, -size * .65);
+    } else if (item.hazard) {
+      ctx.shadowColor = "#f04469";
+      ctx.shadowBlur = 16;
+      ctx.fillStyle = "#a51d3d";
+      ctx.font = `900 ${Math.max(9, size * .18)}px sans-serif`;
+      ctx.fillText("! DANGER", 0, -size * .65);
     }
     const sprite = getOpaqueEmojiSprite(item.icon, size);
     ctx.drawImage(sprite, -size * .7, -size * .7, size * 1.4, size * 1.4);
@@ -659,6 +683,7 @@ function playSound(kind) {
     catch: () => { tone(740, .09, "sine"); tone(988, .12, "sine", .04, .06); },
     rare: () => [659, 880, 1175].forEach((f, i) => tone(f, .2, "triangle", .055, i * .07)),
     miss: () => { tone(220, .18, "square", .025); tone(165, .2, "square", .02, .08); },
+    hazard: () => { tone(150, .22, "sawtooth", .04); tone(95, .28, "square", .035, .08); },
     finish: () => [523, 392].forEach((f, i) => tone(f, .28, "triangle", .045, i * .18)),
     record: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .3, "triangle", .055, i * .12))
   };
