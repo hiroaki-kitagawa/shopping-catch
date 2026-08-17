@@ -32,6 +32,15 @@ const elements = {
 
 const ctx = elements.canvas.getContext("2d");
 const emojiSpriteCache = new Map();
+const itemHitboxRatios = Object.freeze({
+  "🍩": { width: 0.72, height: 0.72 },
+  "🍬": { width: 0.82, height: 0.58 },
+  "🍪": { width: 0.7, height: 0.7 },
+  "🧸": { width: 0.68, height: 0.8 },
+  "🧢": { width: 0.82, height: 0.6 },
+  "🧴": { width: 0.5, height: 0.84 },
+  "🎁": { width: 0.76, height: 0.76 }
+});
 let state = "title";
 let width = 0;
 let height = 0;
@@ -86,10 +95,31 @@ function resizeCanvas() {
   draw();
 }
 
-function getPlayerWidth() { return Math.max(72, width * CONFIG.playerWidthRatio); }
+function getPlayerWidth() { return Math.min(160, Math.max(72, width * CONFIG.playerWidthRatio)); }
 function getPlayerHeight() { return getPlayerWidth() * 0.55; }
-function getItemSize() { return Math.max(34, width * CONFIG.itemSizeRatio); }
+function getItemSize() { return Math.min(72, Math.max(36, width * CONFIG.itemSizeRatio)); }
 function getPlayerY() { return height - getPlayerHeight() - Math.max(14, height * 0.025); }
+
+function getBasketHitbox() {
+  const basketWidth = getPlayerWidth();
+  const basketHeight = getPlayerHeight();
+  return {
+    x: player.x - basketWidth * 0.44,
+    y: getPlayerY() + basketHeight * 0.1,
+    w: basketWidth * 0.88,
+    h: basketHeight * 0.3
+  };
+}
+
+function getItemHitbox(item, previousY = item.y) {
+  const size = getItemSize();
+  const ratio = itemHitboxRatios[item.icon] || { width: 0.7, height: 0.7 };
+  const itemWidth = size * ratio.width;
+  const itemHeight = size * ratio.height;
+  const top = Math.min(previousY, item.y) - itemHeight / 2;
+  const bottom = Math.max(previousY, item.y) + itemHeight / 2;
+  return { x: item.x - itemWidth / 2, y: top, w: itemWidth, h: bottom - top };
+}
 
 function setState(next) {
   state = next;
@@ -179,13 +209,14 @@ function update(dt) {
   }
 
   const itemSize = getItemSize();
-  const basket = { x: player.x - getPlayerWidth() * 0.42, y: getPlayerY() + getPlayerHeight() * 0.14, w: getPlayerWidth() * 0.84, h: getPlayerHeight() * 0.45 };
+  const basket = getBasketHitbox();
   for (const item of items) {
+    const previousY = item.y;
     item.y += item.speed * dt;
     item.rotation += item.spin * dt;
-    const box = { x: item.x - itemSize * 0.38, y: item.y - itemSize * 0.38, w: itemSize * 0.76, h: itemSize * 0.76 };
+    const box = getItemHitbox(item, previousY);
     if (intersects(box, basket)) catchItem(item);
-    else if (item.y - itemSize / 2 > height) missItem(item);
+    else if (item.y - itemSize * 0.7 > height) missItem(item);
   }
   items = items.filter((item) => !item.done);
   particles.forEach((particle) => { particle.x += particle.vx * dt; particle.y += particle.vy * dt; particle.vy += 160 * dt; particle.life -= dt; });
